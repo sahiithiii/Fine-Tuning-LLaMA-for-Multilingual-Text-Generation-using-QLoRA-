@@ -1,0 +1,9 @@
+colorama
+datasets
+pydantic
+litellm
+transformers
+torch
+bitsandbytes
+peft
+trl
