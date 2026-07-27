@@ -29,7 +29,11 @@ CONFIGS = [
     "Dolly_T",
     "HHRLHF_T",
 ]
-
+MAX_ROWS = {
+    "Anudesh": 30000,
+    "Dolly_T": 10000,
+    "HHRLHF_T": 10000,
+}
 
 # for config in CONFIGS:
 #     print(Fore.GREEN + f"\n========== {config} ==========" + Fore.RESET)
@@ -64,7 +68,9 @@ for config in CONFIGS:
     print(Fore.CYAN+f"Columns:{len(ds.column_names)}")
 
     if config=="Anudesh":
-        for row in ds:
+        limit = min(MAX_ROWS[config], len(ds))
+
+        for row in ds.select(range(limit)):
             generated=[]
 
             for pair in row["interactions"]:
@@ -92,35 +98,40 @@ for config in CONFIGS:
 
             idx+=1
     else:
-        language_columns=[
-            col for col in ds.column_names
-            if col not in(
-                "doc_id",
-                "num_turns",
-                "__index_level_0__"
-            )
+        LANGS = [
+            "eng_Latn",
+            "hin_Deva",
+            "tel_Telu",
+            "tam_Taml",
+            "kan_Knda",
+        ]
+
+        language_columns = [
+            lang for lang in LANGS
+            if lang in ds.column_names
         ]
 
         print(Fore.YELLOW+f"Languages found:{len(language_columns)}")
 
-        for row in ds:
+        limit = min(MAX_ROWS[config], len(ds))
+
+        for row in ds.select(range(limit)):
             generated=[]
             for lang in language_columns:
                 conversations=row.get(lang)
                 if not conversations:
                     continue
-                for pair in conversations:
-                    if len(pair)!=2:
-                        continue
-                    question,answer=pair
+                pair = conversations[0]
+                if len(pair)!=2:
+                    continue
+                question,answer=pair
 
-                    if not question or not answer:
-                        continue
-                    generated.append({
-                        "question":question.strip(),
-                        "answer":answer.strip(),
-                        "language":lang
-                    })
+                if not question or not answer:
+                    continue
+                generated.append({
+                    "question":question.strip(),
+                    "answer":answer.strip()
+                })
 
             if generated:
                 dataset[idx]={
@@ -134,27 +145,24 @@ for config in CONFIGS:
                 idx+=1
 
 print(Fore.GREEN+f"\n Total examples saved:{idx}")
-with open("indic_align_multilingual.json","w",encoding="utf-8") as f:
-    json.dump(
-        dataset,
-        f,
-        ensure_ascii=False,
-        indent=2
-    )
-print(Fore.GREEN+"\nSaved to indic_align_multilingual.json")
+with open("data/instruction.jsonl", "w", encoding="utf-8") as f:
+    for sample in dataset.values():
+        for pair in sample["generated"]:
+            f.write(json.dumps(pair, ensure_ascii=False) + "\n")
+
+# with open("indic_align_multilingual.json","w",encoding="utf-8") as f:
+#     json.dump(
+#         dataset,
+#         f,
+#         ensure_ascii=False,
+#         indent=2
+#     )
+print(Fore.GREEN+"\nSaved to instructions.jsonl")
 
 
 
 
-
-
-
-
-
-
-
-
-
+# using llm if we don't know the column names, guessing the names
 
 # #which subsets to pull
 # # CONFIG_SPLIT_MAP={
