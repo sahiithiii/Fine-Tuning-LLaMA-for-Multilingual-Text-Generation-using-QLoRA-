@@ -103,8 +103,16 @@ def main():
     trainer=SFTTrainer(
         model,
         train_dataset=train_dataset,
-        args=SFTConfig(output_dir="meta-llama/Llama-3.2-1B-SFT",num_train_epochs=50),
-        peft_config=peft_config,
+        args = SFTConfig(
+            output_dir="meta-llama/Llama-3.2-3B-SFT",
+            num_train_epochs=2,
+            per_device_train_batch_size=4,
+            gradient_accumulation_steps=4,
+            learning_rate=2e-5,
+            logging_steps=10,
+            save_strategy="epoch",
+            bf16=True,
+        )
     )
 
     trainer.train()
