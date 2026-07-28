@@ -82,6 +82,7 @@ def main():
         base_model,
         device_map="auto",
         quantization_config=quant_config,
+        torch_dtype=torch.float16,
         token=HUGGING_FACE_TOKEN,
         cache_dir="./workspace",
     )
@@ -107,7 +108,7 @@ def main():
         model,
         train_dataset=train_dataset,
         args=SFTConfig(
-            output_dir="meta-llama/Llama-3.2-3B-SFT",
+            output_dir="/content/drive/MyDrive/qlora/checkpoints",
             max_length=512,
             num_train_epochs=2,
             per_device_train_batch_size=2,
@@ -135,8 +136,8 @@ def main():
         print("Starting new training...")
         trainer.train()
 
-    trainer.save_model('complete_checkpoint')
-    trainer.model.save_pretrained("final_model")
+    trainer.save_model("/content/drive/MyDrive/qlora/complete_checkpoint")
+    trainer.model.save_pretrained("/content/drive/MyDrive/qlora/final_model")
 
 if __name__ == "__main__":
     freeze_support()
