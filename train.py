@@ -138,7 +138,7 @@ def main():
             per_device_train_batch_size=2,
             gradient_accumulation_steps=8,
             learning_rate=2e-5,
-
+            report_to="none",
             logging_steps=10,
 
             save_strategy="steps",
