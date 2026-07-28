@@ -123,7 +123,16 @@ def main():
         )
     )
 
-    trainer.train()
+    checkpoint_dir = "/content/drive/MyDrive/qlora/checkpoints"
+
+    if os.path.isdir(checkpoint_dir) and any(
+        d.startswith("checkpoint-") for d in os.listdir(checkpoint_dir)
+    ):
+        print("Resuming from latest checkpoint...")
+        trainer.train(resume_from_checkpoint=True)
+    else:
+        print("Starting new training...")
+        trainer.train()
 
     trainer.save_model('complete_checkpoint')
     trainer.model.save_pretrained("final_model")
