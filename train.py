@@ -108,10 +108,10 @@ def main():
         train_dataset=train_dataset,
         args=SFTConfig(
             output_dir="meta-llama/Llama-3.2-3B-SFT",
-
+            max_length=512,
             num_train_epochs=2,
-            per_device_train_batch_size=4,
-            gradient_accumulation_steps=4,
+            per_device_train_batch_size=2,
+            gradient_accumulation_steps=8,
             learning_rate=2e-5,
 
             logging_steps=10,
