@@ -132,6 +132,7 @@ def main():
         train_dataset=train_dataset,
         args=SFTConfig(
             output_dir=CHECKPOINT_DIR,
+            dataset_text_field="text",
             max_seq_length=512,
             num_train_epochs=2,
             per_device_train_batch_size=2,
@@ -148,8 +149,7 @@ def main():
             bf16=False,
         )
     )
-    dtypes = set(p.dtype for p in model.parameters() if p.requires_grad)
-    print(dtypes)
+
     if os.path.isdir(CHECKPOINT_DIR) and any(
         d.startswith("checkpoint-") for d in os.listdir(CHECKPOINT_DIR)
     ):
