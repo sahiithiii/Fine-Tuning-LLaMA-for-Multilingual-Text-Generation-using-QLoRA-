@@ -133,10 +133,10 @@ def main():
         args=SFTConfig(
             output_dir=CHECKPOINT_DIR,
             dataset_text_field="text",
-            max_seq_length=512,
-            num_train_epochs=2,
+            max_seq_length=256,
+            num_train_epochs=1,
             per_device_train_batch_size=2,
-            gradient_accumulation_steps=8,
+            gradient_accumulation_steps=4,
             learning_rate=2e-5,
             report_to="none",
             logging_steps=10,
