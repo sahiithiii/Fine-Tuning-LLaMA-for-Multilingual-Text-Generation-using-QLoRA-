@@ -89,10 +89,7 @@ def main():
     print(Fore.CYAN+str(model))
     print(Fore.LIGHTYELLOW_EX+str(next(model.parameters())))
 
-    model.gradient_checkpointing_enable()
-    model=prepare_model_for_kbit_training(model)
-    model = get_peft_model(model, peft_config)
-    model.print_trainable_parameters()
+    
 
     peft_config=LoraConfig(
         r=32,
@@ -101,6 +98,10 @@ def main():
         target_modules="all-linear",
         task_type="CAUSAL_LM"
     )
+    model.gradient_checkpointing_enable()
+    model=prepare_model_for_kbit_training(model)
+    model = get_peft_model(model, peft_config)
+    model.print_trainable_parameters()
 
     trainer=SFTTrainer(
         model,
