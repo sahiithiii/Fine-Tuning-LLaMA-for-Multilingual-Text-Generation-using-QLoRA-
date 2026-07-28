@@ -104,6 +104,9 @@ def main():
     model = get_peft_model(model, peft_config)
     model.print_trainable_parameters()
 
+    for name, param in model.named_parameters():
+        if param.dtype == torch.bfloat16:
+            param.data = param.data.to(torch.float16)
     trainer=SFTTrainer(
         model,
         train_dataset=train_dataset,
@@ -125,6 +128,8 @@ def main():
             bf16=False,
         )
     )
+    dtypes = set(p.dtype for p in model.parameters() if p.requires_grad)
+    print(dtypes)  # should show only torch.float32 and/or torch.float16
 
     checkpoint_dir = "/content/drive/MyDrive/qlora/checkpoints"
 
