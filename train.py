@@ -6,20 +6,37 @@ from multiprocessing import freeze_support
 from trl import SFTTrainer,SFTConfig
 from peft import LoraConfig,prepare_model_for_kbit_training,get_peft_model
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
-
-HUGGING_FACE_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
+# --- Kaggle token handling ---
+# On Kaggle, prefer the Secrets Add-on instead of a .env file.
+# Add "HUGGING_FACE_TOKEN" under Add-ons > Secrets in the notebook editor.
+try:
+    from kaggle_secrets import UserSecretsClient
+    HUGGING_FACE_TOKEN = UserSecretsClient().get_secret("HUGGING_FACE_TOKEN")
+except Exception:
+    # fallback: environment variable (e.g. if set manually or via .env)
+    HUGGING_FACE_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
 
 if HUGGING_FACE_TOKEN is None:
-    raise ValueError("HF_TOKEN not found in .env file")
+    raise ValueError(
+        "HUGGING_FACE_TOKEN not found. Add it via Kaggle Secrets "
+        "(Add-ons > Secrets) or set it as an environment variable."
+    )
 
 init(autoreset=True)
+
+# --- Kaggle paths ---
+DATA_PATH = "/kaggle/input/datasets/sahithiakulaa/instruction-jsonl/instruction.jsonl"
+WORK_DIR = "/kaggle/working"
+CHECKPOINT_DIR = os.path.join(WORK_DIR, "qlora", "checkpoints")
+COMPLETE_CHECKPOINT_DIR = os.path.join(WORK_DIR, "qlora", "complete_checkpoint")
+FINAL_MODEL_DIR = os.path.join(WORK_DIR, "qlora", "final_model")
+CACHE_DIR = os.path.join(WORK_DIR, "hf_cache")
+
 def main():
     dataset = load_dataset(
         "json",
-        data_files="data/instruction.jsonl",
+        data_files=DATA_PATH,
         split="train"
     )
     print(Fore.YELLOW+str(dataset[2]))
@@ -84,7 +101,7 @@ def main():
         quantization_config=quant_config,
         torch_dtype=torch.float16,
         token=HUGGING_FACE_TOKEN,
-        cache_dir="./workspace",
+        cache_dir=CACHE_DIR,
     )
 
     print(Fore.CYAN+str(model))
@@ -104,14 +121,17 @@ def main():
     model = get_peft_model(model, peft_config)
     model.print_trainable_parameters()
 
+    # Force any stray bf16 params (e.g. lm_head/embed_tokens) to fp16
+    # so they're compatible with fp16 GradScaler on T4/P100
     for name, param in model.named_parameters():
         if param.dtype == torch.bfloat16:
             param.data = param.data.to(torch.float16)
+
     trainer=SFTTrainer(
         model,
         train_dataset=train_dataset,
         args=SFTConfig(
-            output_dir="/content/drive/MyDrive/qlora/checkpoints",
+            output_dir=CHECKPOINT_DIR,
             max_length=512,
             num_train_epochs=2,
             per_device_train_batch_size=2,
@@ -129,12 +149,9 @@ def main():
         )
     )
     dtypes = set(p.dtype for p in model.parameters() if p.requires_grad)
-    print(dtypes)  # should show only torch.float32 and/or torch.float16
-
-    checkpoint_dir = "/content/drive/MyDrive/qlora/checkpoints"
-
-    if os.path.isdir(checkpoint_dir) and any(
-        d.startswith("checkpoint-") for d in os.listdir(checkpoint_dir)
+    print(dtypes)
+    if os.path.isdir(CHECKPOINT_DIR) and any(
+        d.startswith("checkpoint-") for d in os.listdir(CHECKPOINT_DIR)
     ):
         print("Resuming from latest checkpoint...")
         trainer.train(resume_from_checkpoint=True)
@@ -142,8 +159,8 @@ def main():
         print("Starting new training...")
         trainer.train()
 
-    trainer.save_model("/content/drive/MyDrive/qlora/complete_checkpoint")
-    trainer.model.save_pretrained("/content/drive/MyDrive/qlora/final_model")
+    trainer.save_model(COMPLETE_CHECKPOINT_DIR)
+    trainer.model.save_pretrained(FINAL_MODEL_DIR)
 
 if __name__ == "__main__":
     freeze_support()
