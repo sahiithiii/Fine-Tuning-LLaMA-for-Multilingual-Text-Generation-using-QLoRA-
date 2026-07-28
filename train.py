@@ -122,6 +122,7 @@ def main():
             save_total_limit=3,
 
             fp16=True,
+            bf16=False,
         )
     )
 
