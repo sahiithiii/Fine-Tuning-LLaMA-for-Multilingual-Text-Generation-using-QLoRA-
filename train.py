@@ -112,7 +112,8 @@ def main():
             logging_steps=10,
             save_strategy="epoch",
             bf16=True,
-        )
+        ),
+        peft_config=peft_config,
     )
 
     trainer.train()
