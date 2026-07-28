@@ -4,7 +4,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import torch
 from multiprocessing import freeze_support
 from trl import SFTTrainer,SFTConfig
-from peft import LoraConfig,prepare_model_for_kbit_training
+from peft import LoraConfig,prepare_model_for_kbit_training,get_peft_model
 import os
 from dotenv import load_dotenv
 
@@ -91,6 +91,8 @@ def main():
 
     model.gradient_checkpointing_enable()
     model=prepare_model_for_kbit_training(model)
+    model = get_peft_model(model, peft_config)
+    model.print_trainable_parameters()
 
     peft_config=LoraConfig(
         r=32,
@@ -103,17 +105,22 @@ def main():
     trainer=SFTTrainer(
         model,
         train_dataset=train_dataset,
-        args = SFTConfig(
+        args=SFTConfig(
             output_dir="meta-llama/Llama-3.2-3B-SFT",
+
             num_train_epochs=2,
             per_device_train_batch_size=4,
             gradient_accumulation_steps=4,
             learning_rate=2e-5,
+
             logging_steps=10,
-            save_strategy="epoch",
+
+            save_strategy="steps",
+            save_steps=500,
+            save_total_limit=3,
+
             bf16=True,
-        ),
-        peft_config=peft_config,
+        )
     )
 
     trainer.train()
