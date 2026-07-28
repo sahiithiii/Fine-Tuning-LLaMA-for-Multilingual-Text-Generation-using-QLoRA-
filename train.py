@@ -132,7 +132,7 @@ def main():
         train_dataset=train_dataset,
         args=SFTConfig(
             output_dir=CHECKPOINT_DIR,
-            max_length=512,
+            max_seq_length=512,
             num_train_epochs=2,
             per_device_train_batch_size=2,
             gradient_accumulation_steps=8,
