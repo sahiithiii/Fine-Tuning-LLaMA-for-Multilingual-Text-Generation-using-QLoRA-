@@ -72,7 +72,7 @@ def main():
                 "text":samples
         }
 
-    base_model="meta-llama/Llama-3.2-3B-Instruct"  #Llama-3.2-1B
+    base_model="meta-llama/Llama-3.2-1B-Instruct"
     tokenizer=AutoTokenizer.from_pretrained(
         base_model,
         trust_remote_code=True,
@@ -81,12 +81,26 @@ def main():
     def preprocess(batch):
         return format_chat_template(batch, tokenizer)
 
-    train_dataset=dataset.map(
+    full_dataset=dataset.map(
         preprocess,
         batched=True,
         batch_size=10
     )
-    print(Fore.LIGHTMAGENTA_EX+str(train_dataset[0]))
+    print(Fore.LIGHTMAGENTA_EX+str(full_dataset[0]))
+
+    # Held-out split: used both for eval_loss during training AND as the
+    # source of unseen benchmark questions for eval.py afterward.
+    split = full_dataset.train_test_split(test_size=0.05, seed=42)
+    train_dataset = split["train"]
+    eval_dataset = split["test"]
+
+    # Save held-out questions so eval.py can compare baseline vs fine-tuned
+    # on data the model genuinely never saw during training.
+    held_out_questions = eval_dataset["instruction"][:20]  # cap for eval speed
+    import json
+    os.makedirs(WORK_DIR, exist_ok=True)
+    with open(os.path.join(WORK_DIR, "held_out_questions.json"), "w", encoding="utf-8") as f:
+        json.dump(held_out_questions, f, ensure_ascii=False, indent=2)
 
     quant_config=BitsAndBytesConfig(
         load_in_4bit=True,
@@ -130,20 +144,27 @@ def main():
     trainer=SFTTrainer(
         model,
         train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
         args=SFTConfig(
             output_dir=CHECKPOINT_DIR,
             dataset_text_field="text",
             max_seq_length=256,
-            num_train_epochs=1,
+            num_train_epochs=2,
             per_device_train_batch_size=2,
+            per_device_eval_batch_size=2,
             gradient_accumulation_steps=4,
             learning_rate=2e-5,
-            report_to="none",
+
             logging_steps=10,
+
+            eval_strategy="steps",
+            eval_steps=500,
 
             save_strategy="steps",
             save_steps=500,
             save_total_limit=3,
+
+            report_to="none",
 
             fp16=True,
             bf16=False,
