@@ -32,7 +32,7 @@ if HUGGING_FACE_TOKEN is None:
 init(autoreset=True)
 
 # --- Kaggle paths ---
-DATA_PATH = "/kaggle/input/datasets/sahithiakulaa/instruction-jsonl/instruction.jsonl"
+DATA_PATH = "/kaggle/input/datasets/sahithiakula/instruction-jsonl/instruction.jsonl"
 WORK_DIR = "/kaggle/working"
 CHECKPOINT_DIR = os.path.join(WORK_DIR, "qlora", "checkpoints")
 COMPLETE_CHECKPOINT_DIR = os.path.join(WORK_DIR, "qlora", "complete_checkpoint")
