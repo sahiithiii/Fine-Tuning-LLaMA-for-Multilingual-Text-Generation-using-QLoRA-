@@ -6,7 +6,13 @@ from multiprocessing import freeze_support
 from trl import SFTTrainer,SFTConfig
 from peft import LoraConfig,prepare_model_for_kbit_training,get_peft_model
 import os
+import torch
 
+_original_torch_load = torch.load
+def _patched_torch_load(*args, **kwargs):
+    kwargs.setdefault("weights_only", False)
+    return _original_torch_load(*args, **kwargs)
+torch.load = _patched_torch_load
 # --- Kaggle token handling ---
 # On Kaggle, prefer the Secrets Add-on instead of a .env file.
 # Add "HUGGING_FACE_TOKEN" under Add-ons > Secrets in the notebook editor.
