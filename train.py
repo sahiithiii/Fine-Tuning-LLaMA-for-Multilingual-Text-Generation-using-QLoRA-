@@ -188,6 +188,22 @@ def main():
 
     trainer.save_model(COMPLETE_CHECKPOINT_DIR)
     trainer.model.save_pretrained(FINAL_MODEL_DIR)
+    # --- Push immediately, inside the same session, right after training ---
+    from huggingface_hub import HfApi
+    api = HfApi(token=HUGGING_FACE_TOKEN)
+    repo_id = "sahiithiii/Fine-Tuning-Llama-w-Multilingual-Dataset-using-qLoRA"
+    api.create_repo(repo_id, exist_ok=True, private=True)
+
+    print(Fore.GREEN + "Uploading final_model...")
+    api.upload_folder(folder_path=FINAL_MODEL_DIR, repo_id=repo_id, path_in_repo="final_model")
+
+    print(Fore.GREEN + "Uploading complete_checkpoint...")
+    api.upload_folder(folder_path=COMPLETE_CHECKPOINT_DIR, repo_id=repo_id, path_in_repo="complete_checkpoint")
+
+    print(Fore.GREEN + "Uploading checkpoints (last 3, per save_total_limit)...")
+    api.upload_folder(folder_path=CHECKPOINT_DIR, repo_id=repo_id, path_in_repo="checkpoints")
+
+    print(Fore.GREEN + "All artifacts pushed to Hugging Face Hub successfully.")
 
 if __name__ == "__main__":
     freeze_support()
