@@ -69,7 +69,8 @@ def main():
                 {"role":"assistant","content":answers[i]}
             ]
 
-            text=tokenizer.apply_chat_template(row_json,tokenize=False)
+            text=tokenizer.apply_chat_template(row_json,tokenize=False,add_generation_prompt=False)
+            text+=tokenizer.eos_token
             samples.append(text)
 
         return {
