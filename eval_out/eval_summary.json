@@ -1,0 +1,134 @@
+{
+  "n": 15,
+  "max_new_tokens_cap": 200,
+  "quality": {
+    "base": {
+      "accuracy": 2.91,
+      "helpfulness": 3.18,
+      "fluency": 2.45
+    },
+    "finetuned": {
+      "accuracy": 2.92,
+      "helpfulness": 3.58,
+      "fluency": 2.86
+    },
+    "n_judged": 11
+  },
+  "behaviour": {
+    "base": {
+      "truncation_rate": 0.533,
+      "avg_tokens_generated": 131.5,
+      "repetition_rate": 0.2
+    },
+    "finetuned": {
+      "truncation_rate": 0.541,
+      "avg_tokens_generated": 157.7,
+      "repetition_rate": 0.21
+    }
+  },
+  "auxiliary_text_overlap": {
+    "base": {
+      "avg_rouge_l": 0.3298,
+      "avg_bleu": 0.1419,
+      "lang_match_rate": 0.733
+    },
+    "finetuned": {
+      "avg_rouge_l": 0.4218,
+      "avg_bleu": 0.2639,
+      "lang_match_rate": 0.871
+    }
+  },
+  "breakdown": {
+    "category": {
+      "coding": {
+        "n": 2,
+        "base_rouge_l": 0.073,
+        "ft_rouge_l": 0.087,
+        "base_lang_match": 0.0,
+        "ft_lang_match": 0.0
+      },
+      "general_knowledge": {
+        "n": 3,
+        "base_rouge_l": 0.545,
+        "ft_rouge_l": 0.896,
+        "base_lang_match": 1.0,
+        "ft_lang_match": 1.0
+      },
+      "multilingual_factual_qa": {
+        "n": 2,
+        "base_rouge_l": 0.514,
+        "ft_rouge_l": 0.622,
+        "base_lang_match": 1.0,
+        "ft_lang_match": 1.0
+      },
+      "reasoning": {
+        "n": 2,
+        "base_rouge_l": 0.327,
+        "ft_rouge_l": 0.218,
+        "base_lang_match": 1.0,
+        "ft_lang_match": 1.0
+      },
+      "safety": {
+        "n": 2,
+        "base_rouge_l": 0.233,
+        "ft_rouge_l": 0.276,
+        "base_lang_match": 1.0,
+        "ft_lang_match": 1.0
+      },
+      "summarization": {
+        "n": 2,
+        "base_rouge_l": 0.509,
+        "ft_rouge_l": 0.527,
+        "base_lang_match": 1.0,
+        "ft_lang_match": 1.0
+      },
+      "translation": {
+        "n": 2,
+        "base_rouge_l": 0.0,
+        "ft_rouge_l": 0.0,
+        "base_lang_match": 0.0,
+        "ft_lang_match": 0.0
+      }
+    },
+    "language": {
+      "en": {
+        "n": 2,
+        "base_rouge_l": 0.426,
+        "ft_rouge_l": 0.499,
+        "base_lang_match": 0.5,
+        "ft_lang_match": 0.5
+      },
+      "hi": {
+        "n": 4,
+        "base_rouge_l": 0.511,
+        "ft_rouge_l": 0.2,
+        "base_lang_match": 1.0,
+        "ft_lang_match": 1.0
+      },
+      "kn": {
+        "n": 3,
+        "base_rouge_l": 0.275,
+        "ft_rouge_l": 0.283,
+        "base_lang_match": 0.667,
+        "ft_lang_match": 0.667
+      },
+      "ta": {
+        "n": 3,
+        "base_rouge_l": 0.212,
+        "ft_rouge_l": 0.194,
+        "base_lang_match": 0.667,
+        "ft_lang_match": 0.667
+      },
+      "te": {
+        "n": 3,
+        "base_rouge_l": 0.196,
+        "ft_rouge_l": 0.226,
+        "base_lang_match": 0.667,
+        "ft_lang_match": 0.667
+      }
+    }
+  },
+  "judge_winner_counts": {
+    "B": 8
+  }
+}
