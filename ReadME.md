@@ -1,8 +1,5 @@
-# qLoRA Multilingual Fine-Tuning Project
 
-## Title
-
-**Multilingual QLoRA Fine-Tuning of `meta-llama/Llama-3.2-1B-Instruct`**
+**Fine-Tuning LLaMA for Multilingual Text Generation using QLoRA**
 
 ---
 
